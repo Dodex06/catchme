@@ -268,4 +268,7 @@ main {
 .links > a:focus,
 .links > a:focus > strong {
   background-color: var(--background-alt);
+}body {
+  background-color: lightblue; /* Fond bleu clair */
+  font-family: Arial, sans-serif; /* Police plus moderne */
 }
