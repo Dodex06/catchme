@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <title>CatchMe – Landing page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Simple landing page demo with dark mode.">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+
+    <!-- fonts -->
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+      // replace no-js with js
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-head">
+      <div class="wrap">
+        <a class="site-head__brand" href="/">
+          <span aria-hidden="true">⚡</span>
+          <span class="sr-only">CatchMe</span>
+        </a>
+
+        <button id="color-mode" class="site-head__mode" aria-label="Toggle dark mode">
+          <span class="icon-sun" aria-hidden="true">☀️</span>
+          <span class="icon-moon" aria-hidden="true">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero wrap">
+        <h1 class="hero__title">CatchMe</h1>
+        <p class="hero__lead">Une landing page légère (HTML/CSS/JS) avec un bouton mode sombre.</p>
+        <a class="cta" href="#cta">Commencer</a>
+      </section>
+
+      <section class="features wrap">
+        <h2>Fonctionnalités</h2>
+        <ul class="grid">
+          <li class="card">
+            <h3>Rapide</h3>
+            <p>Statique et super rapide à mettre en ligne.</p>
+          </li>
+          <li class="card">
+            <h3>Accessible</h3>
+            <p>Police Inter, contraste correct, balises ARIA.</p>
+          </li>
+          <li class="card">
+            <h3>Mode sombre</h3>
+            <p>Bouton pour basculer clair/sombre.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="wrap" id="cta">
+        <h2>Prêt à l’emploi</h2>
+        <p>Modifie ce texte pour décrire ton projet réel.</p>
+        <a class="cta" href="#">Me contacter</a>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <small>© <span id="year"></span> CatchMe</small>
+      </div>
+    </footer>
+
+    <script src="js/dark-mode.js"></script>
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
