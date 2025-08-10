@@ -1,81 +1,73 @@
-<!doctype html>
-<html lang="en" class="no-js">
+<!DOCTYPE html>
+<html class="preload" lang="en">
   <head>
+    <!-- Site designed for Drop by the team at 
+    ███╗   ██╗███████╗████████╗██╗     ██╗███████╗██╗   ██╗
+    ████╗  ██║██╔════╝╚══██╔══╝██║     ██║██╔════╝╚██╗ ██╔╝
+    ██╔██╗ ██║█████╗     ██║   ██║     ██║█████╗   ╚████╔╝ 
+    ██║╚██╗██║██╔══╝     ██║   ██║     ██║██╔══╝    ╚██╔╝  
+    ██║ ╚████║███████╗   ██║   ███████╗██║██║        ██║   
+    ╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚══════╝╚═╝╚═╝        ╚═╝    -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
-    <title>CatchMe – Landing page</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="Simple landing page demo with dark mode.">
-    <link rel="icon" href="images/favicon.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 
-    <!-- fonts -->
-    <link rel="preconnect" href="https://rsms.me/">
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <!-- The name of your site that shows up in the browser tab -->
+    <title>Welcome to my site</title>
 
-    <link rel="stylesheet" href="css/styles.css">
-    <script>
-      // replace no-js with js
-      document.documentElement.classList.remove('no-js');
-      document.documentElement.classList.add('js');
-    </script>
+    <!-- Describe what your site is about -->
+    <meta name="description" content="A list of places you can find me on the web.">
+
+    <!-- This is the small icon that shows up in the browser tab -->
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <!-- Styling for this site -->
+    <link rel="stylesheet" href="/css/styles.css">
   </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="site-head">
-      <div class="wrap">
-        <a class="site-head__brand" href="/">
-          <span aria-hidden="true">⚡</span>
-          <span class="sr-only">CatchMe</span>
-        </a>
-
-        <button id="color-mode" class="site-head__mode" aria-label="Toggle dark mode">
-          <span class="icon-sun" aria-hidden="true">☀️</span>
-          <span class="icon-moon" aria-hidden="true">🌙</span>
+  <!-- This class is removed if the user has JavaScript enabled -->
+  <body class="no-js">
+    <header>
+      <!-- Dark mode toggle -->
+      <div class="mode-toggle">
+        <button class="[ toggle-button ] [ js-mode-toggle ]">
+          <span class="toggle-icon" aria-hidden="true"></span>
+          <span class="[ toggle-text ] [ js-mode-toggle-text ]">Switch to dark theme</span>
         </button>
       </div>
     </header>
-
-    <main id="main">
-      <section class="hero wrap">
-        <h1 class="hero__title">CatchMe</h1>
-        <p class="hero__lead">Une landing page légère (HTML/CSS/JS) avec un bouton mode sombre.</p>
-        <a class="cta" href="#cta">Commencer</a>
+    <main>
+      <section class="about">
+        <h1>Frodo Baggins</h1>
+        <p>Frodo is a proven leader who thrives in small teams and can go the distance.</p>
       </section>
-
-      <section class="features wrap">
-        <h2>Fonctionnalités</h2>
-        <ul class="grid">
-          <li class="card">
-            <h3>Rapide</h3>
-            <p>Statique et super rapide à mettre en ligne.</p>
-          </li>
-          <li class="card">
-            <h3>Accessible</h3>
-            <p>Police Inter, contraste correct, balises ARIA.</p>
-          </li>
-          <li class="card">
-            <h3>Mode sombre</h3>
-            <p>Bouton pour basculer clair/sombre.</p>
-          </li>
-        </ul>
-      </section>
-
-      <section class="wrap" id="cta">
-        <h2>Prêt à l’emploi</h2>
-        <p>Modifie ce texte pour décrire ton projet réel.</p>
-        <a class="cta" href="#">Me contacter</a>
-      </section>
+      <nav class="links">
+        <!-- Update <a href=""> to point to your accounts -->
+        <!-- Update <span> to your usernames -->
+        <a href="mailto:frodo@bag.end">
+          <strong>E-mail</strong>
+          <span>frodo@bag.end</span>
+        </a>
+        <a href="https://twitter.com/frodobaggins">
+          <strong>Twitter</strong>
+          <span>@frodobaggins</span>
+        </a>
+        <a href="https://linkedin.com">
+          <strong>LinkedIn</strong>
+          <span>@frodobaggins</span>
+        </a>
+        <a href="https://github.com">
+          <strong>GitHub</strong>
+          <span>@frodobags</span>
+        </a>
+        <a href="https://codepen.io">
+          <strong>CodePen</strong>
+          <span>@frodobags</span>
+        </a>
+      </nav>
     </main>
 
-    <footer class="site-foot">
-      <div class="wrap">
-        <small>© <span id="year"></span> CatchMe</small>
-      </div>
-    </footer>
-
-    <script src="js/dark-mode.js"></script>
-    <script>
-      document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
+    <!-- Dark mode button functionality -->
+    <script src="/js/dark-mode.js"></script>
   </body>
 </html>
