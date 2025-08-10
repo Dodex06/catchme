@@ -1,95 +1,47 @@
-var body = document.body;
-var root = document.getElementsByTagName( 'html' )[0];
+// dark-mode.js
 
-body.classList.remove('no-js');
+// 1) Retirer l'indicateur "no-js" si présent
+document.documentElement.classList.remove('no-js');
 
-window.addEventListener( 'load', function load() { window.removeEventListener('load', load, false); root.classList.remove('preload'); }, false);
+// 2) Clés & helpers
+const STORAGE_KEY = 'theme';
 
-const STORAGE_KEY = 'user-color-scheme';
-const COLOR_MODE_KEY = '--color-mode';
-
-/** Andy Bell’s dark mode technique
-https://hankchizljaw.com/wrote/create-a-user-controlled-dark-or-light-mode/
-**/
-
-const modeToggleButton = document.querySelector('.js-mode-toggle');
-const modeToggleText = document.querySelector('.js-mode-toggle-text');
-// const modeStatusElement = document.querySelector('.js-mode-status');
-
-/**
- * Pass in a custom prop key and this function will return its
- * computed value. 
- * A reduced version of this: https://andy-bell.design/wrote/get-css-custom-property-value-with-javascript/
- */
-const getCSSCustomProp = (propKey) => {
-  let response = getComputedStyle(document.documentElement).getPropertyValue(propKey);
-
-  // Tidy up the string if there’s something to work with
-  if (response.length) {
-    response = response.replace(/\'|"/g, '').trim();
-  }
-
-  // Return the string response by default
-  return response;
+const getPreferredTheme = () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved === 'dark' || saved === 'light') return saved;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
-/**
- * Takes either a passed setting ('light'|'dark') or grabs that from localStorage.
- * If it can’t find the setting in either, it tries to load the CSS color mode,
- * controlled by the media query
- */
-const applySetting = passedSetting => {
-  let currentSetting = passedSetting || localStorage.getItem(STORAGE_KEY);
-  
-  if(currentSetting) {
-    document.documentElement.setAttribute('data-user-color-scheme', currentSetting);
-    setButtonLabel(currentSetting);
-  }
-  else {
-    setButtonLabel(getCSSCustomProp(COLOR_MODE_KEY));
-  }
+const applyTheme = (theme) => {
+  // Pour couvrir tous les cas de CSS : attribut + classes
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  document.body.classList.toggle('dark', theme === 'dark');
+  document.body.classList.toggle('light', theme !== 'dark');
+};
+
+// 3) Appliquer le thème au chargement
+applyTheme(getPreferredTheme());
+
+// 4) Bouton de bascule (on accepte plusieurs sélecteurs possibles)
+const toggleBtn =
+  document.querySelector('[data-toggle-theme]') ||
+  document.querySelector('.js-toggle-theme') ||
+  document.querySelector('.mode-toggle button') ||
+  document.querySelector('.toggle-button');
+
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    const next = (document.body.classList.contains('dark')) ? 'light' : 'dark';
+    localStorage.setItem(STORAGE_KEY, next);
+    applyTheme(next);
+  });
 }
 
-/**
- * Gets the current setting > reverses it > stores it
- */
-const toggleSetting = () => {
-  let currentSetting = localStorage.getItem(STORAGE_KEY);
-  
-  switch(currentSetting) {
-    case null:
-      currentSetting = getCSSCustomProp(COLOR_MODE_KEY) === 'dark' ? 'light' : 'dark';
-      break;
-    case 'light':
-      currentSetting = 'dark';
-      break;
-    case 'dark':
-      currentSetting = 'light';
-      break;
+// 5) Si l’utilisateur change son préférence système, on suit SAUF si l’utilisateur a déjà choisi
+const mql = window.matchMedia('(prefers-color-scheme: dark)');
+mql.addEventListener?.('change', () => {
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    applyTheme(getPreferredTheme());
   }
-
-
-  localStorage.setItem(STORAGE_KEY, currentSetting);
-  
-  return currentSetting;
-}
-
-/**
- * A shared method for setting the button text label and visually hidden status element 
- */
-const setButtonLabel = currentSetting => { 
-  modeToggleText.innerText = `Switch to ${currentSetting === 'dark' ? 'light' : 'dark'} theme`;
-  // modeStatusElement.innerText = `Color mode is now "${currentSetting}"`;
-}
-
-/**
- * Clicking the button runs the apply setting method which grabs its parameter
- * from the toggle setting method.
- */
-modeToggleButton.addEventListener('click', evt => {
-  evt.preventDefault();
-  
-  applySetting(toggleSetting());
 });
-
-applySetting();
