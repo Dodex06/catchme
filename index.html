@@ -1,48 +1,62 @@
 <!DOCTYPE html>
-<html class="preload" lang="fr">
-<head>
-  <!-- Site personnalisé -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <!-- Nom de ton site -->
-  <title>Dodex06 - Portfolio</title>
-  
-  <!-- Description pour moteurs de recherche -->
-  <meta name="description" content="Dodex06 - Développeur passionné créant des projets web modernes et dynamiques.">
-  
-  <!-- Favicon -->
-  <link rel="shortcut icon" href="favicon.png">
-  
-  <!-- Feuille de style -->
-  <link rel="stylesheet" href="styles.css">
-  
-  <!-- Script mode sombre -->
-  <script src="dark-mode.js" defer></script>
-</head>
+<html lang="en" class="preload no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
 
-<body class="no-js">
-  <header>
-    <!-- Bouton mode sombre -->
-    <div class="mode-toggle">
-      <button class="[ toggle-button ] [ js-mode-toggle ]">
-        <span class="toggle-icon" aria-hidden="true"></span>
-        <span class="[ toggle-text ] [ js-mode-toggle-text ]">Activer le mode sombre</span>
-      </button>
-    </div>
-  </header>
+    <!-- Title & description -->
+    <title>Welcome to my site</title>
+    <meta name="description" content="A little demo site." />
 
-  <main>
-    <h1>Dodex06</h1>
-    <p>Développeur passionné, créatif et toujours curieux d'apprendre. J’aime concevoir des projets modernes et dynamiques sur le web.</p>
-    
-    <p>
-      <a href="mailto:ton.email@example.com">E-mail</a> |
-      <a href="https://twitter.com/tonpseudo" target="_blank">Twitter</a> |
-      <a href="https://www.linkedin.com/in/tonprofil" target="_blank">LinkedIn</a> |
-      <a href="https://github.com/Dodex06" target="_blank">GitHub</a>
-    </p>
-  </main>
-</body>
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.png" type="image/png" />
+    <link rel="shortcut icon" href="favicon.png" type="image/png" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- IMPORTANT : ce mini-script remplace no-js par js le plus tôt possible -->
+    <script>
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+
+  <body class="no-js">
+    <header>
+      <!-- Bouton mode sombre / clair (structure attendue par le CSS du thème) -->
+      <div class="mode-toggle">
+        <button class="[ toggle-button ] [ js-mode-toggle ]" aria-pressed="false">
+          <span class="toggle-icon" aria-hidden="true">🌙</span>
+          <span class="[ toggle-text ] [ js-mode-toggle-text ]">Switch to dark theme</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Bloc de contenu existant (exemples) -->
+      <section class="about">
+        <h1>Frodo Baggins</h1>
+        <p>Frodo is a proven leader who thrives in small teams and can go the distance.</p>
+        <p class="links">
+          <a href="mailto:frodo@bag.end"><span>E-mail</span></a>
+          <a href="#"><span>Twitter</span></a>
+          <a href="#"><span>LinkedIn</span></a>
+          <a href="#"><span>GitHub</span></a>
+          <a href="#"><span>CodePen</span></a>
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <small>© 2025</small>
+    </footer>
+
+    <!-- IMPORTANT : on charge maintenant le script de thème À LA FIN -->
+    <script src="dark-mode.js" defer></script>
+  </body>
 </html>
