@@ -93,7 +93,7 @@ const init = () => {
         toggleTheme();
       }
     });
-  }
+  
 
   // Synchronisation entre onglets
   window.addEventListener('storage', (e) => {
