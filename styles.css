@@ -256,3 +256,20 @@ th{
   color:var(--text);
 }
 tr:last-child td{ border-bottom:0 }
+/* === Thème (ajout) === */
+:root{
+  --bg: #ffffff;     /* fond clair */
+  --text: #0f172a;   /* texte clair */
+}
+
+body{
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color .2s, color .2s;
+}
+
+/* Quand le thème sombre est actif */
+[data-theme="dark"]{
+  --bg: #0b1220;   /* fond sombre */
+  --text: #e2e8f0; /* texte sombre */
+}
