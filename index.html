@@ -10,14 +10,14 @@
   <!-- Styles généraux -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Mode sombre existant -->
+  <!-- Mode sombre -->
   <script src="js/dark-mode.js" defer></script>
 
   <!-- Leaflet (carte) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
-  <!-- Styles minimaux pour la barre & la carte (indépendant de ton styles.css) -->
+  <!-- Styles pour la barre & la carte -->
   <style>
     :root { --bar-h: 56px; }
     body { margin:0; font-family: system-ui, Arial, sans-serif; }
@@ -29,7 +29,6 @@
     #map { height: calc(60vh); width: 100vw; }
     .notice { margin:8px 12px; font-size:14px; opacity:.8; }
     .marker-emoji { font-size:24px; line-height:24px; }
-    /* petit confort dark */
     :root[data-theme="dark"] header { border-color:#223; }
     :root[data-theme="dark"] .status-picker button { background:#0f1629; border-color:#334; color:#e8edf7; }
   </style>
@@ -52,7 +51,7 @@
     <a href="#contact"><span>Contact</span></a>
   </nav>
 
-  <!-- Choix d’activité (CatchMe) -->
+  <!-- Choix activité -->
   <div class="status-picker" aria-label="Choisir une activité">
     <strong>Je suis :</strong>
     <button data-ico="🍔" title="Manger">🍔</button>
@@ -102,13 +101,12 @@
   </section>
 </main>
 
-<!-- Script CatchMe (carte + géoloc + icône) -->
+<!-- Script CatchMe -->
 <script>
 let map, meMarker;
-let currentIcon = "🍔"; // par défaut
+let currentIcon = "🍔";
 
 document.addEventListener('DOMContentLoaded', () => {
-  // activer le 1er bouton et gérer les clics
   const buttons = document.querySelectorAll('.status-picker button[data-ico]');
   buttons.forEach((btn, i) => {
     if (i === 0) btn.classList.add('active');
@@ -116,8 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentIcon = btn.dataset.ico;
-      if (meMarker) meMarker.setIcon(emojiIcon(currentIcon));
-      if (meMarker) meMarker.setPopupContent("Moi : " + currentIcon);
+      if (meMarker) {
+        meMarker.setIcon(emojiIcon(currentIcon));
+        meMarker.setPopupContent("Moi : " + currentIcon);
+      }
     });
   });
 
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initMap() {
-  map = L.map('map').setView([48.8566, 2.3522], 13); // Paris par défaut
+  map = L.map('map').setView([48.8566, 2.3522], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap'
@@ -136,7 +136,7 @@ function initMap() {
 function locateMe() {
   const notice = document.getElementById('notice');
   if (!navigator.geolocation) {
-    notice.textContent = "La géolocalisation n'est pas disponible sur cet appareil.";
+    notice.textContent = "La géolocalisation n'est pas disponible.";
     return;
   }
   navigator.geolocation.getCurrentPosition(
@@ -145,7 +145,7 @@ function locateMe() {
       map.setView([latitude, longitude], 16);
       meMarker = L.marker([latitude, longitude], { icon: emojiIcon(currentIcon) }).addTo(map);
       meMarker.bindPopup("Moi : " + currentIcon).openPopup();
-      notice.textContent = "Position trouvée. Change l’icône en haut si tu veux.";
+      notice.textContent = "Position trouvée. Change l’icône si tu veux.";
     },
     (err) => {
       notice.textContent = "Autorise la localisation pour te placer sur la carte.";
