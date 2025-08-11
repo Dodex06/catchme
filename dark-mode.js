@@ -1,87 +1,44 @@
-// dark-mode.js
-// Gestion du mode sombre / clair avec persistance et synchro
+// dark-mode.js — gestion simple du thème clair/sombre
 
-// 1) JS actif : retirer l’indicateur "no-js"
 document.documentElement.classList.remove('no-js');
 
-// 2) Constantes
-const STORAGE_KEY = 'theme'; // valeur: "light" | "dark"
-const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const STORAGE_KEY = 'theme';
+const ATTR = 'data-theme';
 
-// 3) Trouver le bouton (on essaie plusieurs sélecteurs possibles)
-function getToggleButton() {
-  return (
-    document.querySelector('[data-theme-toggle]') ||
-    document.querySelector('.mode-toggle button') ||
-    document.querySelector('#theme-toggle') ||
-    document.querySelector('.toggle-button') ||
-    document.querySelector('button[aria-pressed][data-toggle="theme"]')
-  );
+function getStoredTheme() {
+  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
 }
-
-// 4) Thème préféré (stocké > système > défaut: light)
-function getPreferredTheme() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === 'dark' || saved === 'light') return saved;
-  return mediaQuery.matches ? 'dark' : 'light';
+function getSystemTheme() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
+function applyTheme(theme) {
+  document.documentElement.setAttribute(ATTR, theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#0b1220' : '#ffffff');
+}
+function initTheme() {
+  const stored = getStoredTheme();
+  const theme = stored || getSystemTheme();
+  applyTheme(theme);
 
-// 5) Appliquer le thème et tenir l’UI à jour
-function applyTheme(theme, { persist = true } = {}) {
-  const t = theme === 'dark' ? 'dark' : 'light';
-
-  // Appliquer au <html> (documentElement)
-  document.documentElement.setAttribute('data-theme', t);
-
-  // Optionnel : classe sur <body> si votre CSS la regarde
-  document.body.classList.toggle('dark', t === 'dark');
-  document.body.classList.toggle('light', t === 'light');
-
-  // Mettre à jour le bouton si présent
-  const btn = getToggleButton();
-  if (btn) {
-    // aria-pressed = true si sombre
-    btn.setAttribute('aria-pressed', String(t === 'dark'));
-    // Mettre à jour le texte si un span.toggle-text existe
-    const txt = btn.querySelector('.toggle-text');
-    if (txt) txt.textContent = t === 'dark' ? 'Mode sombre' : 'Mode clair';
+  if (window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = e => { if (!getStoredTheme()) applyTheme(e.matches ? 'dark' : 'light'); };
+    if (mq.addEventListener) mq.addEventListener('change', handler);
+    else if (mq.addListener) mq.addListener(handler); // anciens navigateurs
   }
-
-  if (persist) localStorage.setItem(STORAGE_KEY, t);
-  return t;
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute(ATTR) || getSystemTheme();
+  const next = current === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem(STORAGE_KEY, next); } catch {}
+  applyTheme(next);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.setAttribute('aria-pressed', String(next === 'dark'));
 }
 
-// 6) Initialisation
-let currentTheme = applyTheme(getPreferredTheme());
-
-// Si l’utilisateur n’a PAS forcé un choix, suivre le système
-function shouldFollowSystem() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  return saved !== 'dark' && saved !== 'light';
-}
-
-// Réagir aux changements du système uniquement si on suit le système
-mediaQuery.addEventListener?.('change', (e) => {
-  if (shouldFollowSystem()) {
-    currentTheme = applyTheme(e.matches ? 'dark' : 'light', { persist: false });
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.addEventListener('click', toggleTheme);
 });
-
-// 7) Câbler le bouton
-const btn = getToggleButton();
-if (btn) {
-  // Assurer des attributs d’accessibilité
-  if (!btn.hasAttribute('aria-pressed')) btn.setAttribute('aria-pressed', String(currentTheme === 'dark'));
-  btn.setAttribute('data-toggle', 'theme');
-
-  btn.addEventListener('click', () => {
-    currentTheme = applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
-  });
-}
-
-// 8) Synchroniser entre onglets
-window.addEventListener('storage', (e) => {
-  if (e.key === STORAGE_KEY && e.newValue) {
-    currentTheme = applyTheme(e.newValue, { persist: false });
-  }
-});p
