@@ -5,17 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="Dodex06 - Portfolio">
-  <title>Dodex06 – Portfolio</title>
+  <title>Dodex06 – Portfolio + CatchMe</title>
 
-  <!-- Favicon -->
-  <link rel="icon" href="favicon.ico">
-  <link rel="shortcut icon" href="favicon.ico">
-
-  <!-- Styles -->
+  <!-- Styles généraux -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Script mode sombre -->
+  <!-- Mode sombre existant -->
   <script src="js/dark-mode.js" defer></script>
+
+  <!-- Leaflet (carte) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+  <!-- Styles minimaux pour la barre & la carte (indépendant de ton styles.css) -->
+  <style>
+    :root { --bar-h: 56px; }
+    body { margin:0; font-family: system-ui, Arial, sans-serif; }
+    header { padding:12px; border-bottom:1px solid #ddd; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .links a { margin-right:12px; text-decoration:none; }
+    .status-picker { display:flex; gap:8px; align-items:center; }
+    .status-picker button { font-size:18px; padding:6px 10px; border:1px solid #ccc; background:#fff; border-radius:8px; }
+    .status-picker button.active { border-color:#0070f3; box-shadow:0 0 0 2px rgba(0,112,243,.15); }
+    #map { height: calc(60vh); width: 100vw; }
+    .notice { margin:8px 12px; font-size:14px; opacity:.8; }
+    .marker-emoji { font-size:24px; line-height:24px; }
+    /* petit confort dark */
+    :root[data-theme="dark"] header { border-color:#223; }
+    :root[data-theme="dark"] .status-picker button { background:#0f1629; border-color:#334; color:#e8edf7; }
+  </style>
 </head>
 <body class="no-js">
 
@@ -34,7 +51,21 @@
     <a href="#projects"><span>Projets</span></a>
     <a href="#contact"><span>Contact</span></a>
   </nav>
+
+  <!-- Choix d’activité (CatchMe) -->
+  <div class="status-picker" aria-label="Choisir une activité">
+    <strong>Je suis :</strong>
+    <button data-ico="🍔" title="Manger">🍔</button>
+    <button data-ico="🍻" title="Boire">🍻</button>
+    <button data-ico="⚽"  title="Match">⚽</button>
+    <button data-ico="🎉"  title="Soirée">🎉</button>
+    <button data-ico="💬"  title="Discuter">💬</button>
+  </div>
 </header>
+
+<!-- Carte -->
+<div id="map"></div>
+<p class="notice" id="notice">Choisis une icône puis autorise la géolocalisation.</p>
 
 <main id="content">
   <!-- Section à propos -->
@@ -70,6 +101,69 @@
     </ul>
   </section>
 </main>
+
+<!-- Script CatchMe (carte + géoloc + icône) -->
+<script>
+let map, meMarker;
+let currentIcon = "🍔"; // par défaut
+
+document.addEventListener('DOMContentLoaded', () => {
+  // activer le 1er bouton et gérer les clics
+  const buttons = document.querySelectorAll('.status-picker button[data-ico]');
+  buttons.forEach((btn, i) => {
+    if (i === 0) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentIcon = btn.dataset.ico;
+      if (meMarker) meMarker.setIcon(emojiIcon(currentIcon));
+      if (meMarker) meMarker.setPopupContent("Moi : " + currentIcon);
+    });
+  });
+
+  initMap();
+  locateMe();
+});
+
+function initMap() {
+  map = L.map('map').setView([48.8566, 2.3522], 13); // Paris par défaut
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+}
+
+function locateMe() {
+  const notice = document.getElementById('notice');
+  if (!navigator.geolocation) {
+    notice.textContent = "La géolocalisation n'est pas disponible sur cet appareil.";
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      map.setView([latitude, longitude], 16);
+      meMarker = L.marker([latitude, longitude], { icon: emojiIcon(currentIcon) }).addTo(map);
+      meMarker.bindPopup("Moi : " + currentIcon).openPopup();
+      notice.textContent = "Position trouvée. Change l’icône en haut si tu veux.";
+    },
+    (err) => {
+      notice.textContent = "Autorise la localisation pour te placer sur la carte.";
+      console.warn(err);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function emojiIcon(emoji) {
+  return L.divIcon({
+    className: 'marker-emoji',
+    html: emoji,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+}
+</script>
 
 </body>
 </html>
