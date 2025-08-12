@@ -6,46 +6,88 @@
   <title>Carte avec localisation</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <style>
-    #map {
-      height: 90vh;
-      width: 100%;
-    }
+    #map { height: 80vh; width: 100%; }
+    #ui  { display:flex; gap:.5rem; align-items:center; margin:8px 0; font-family: system-ui, sans-serif; }
+    #status { opacity:.8; }
   </style>
 </head>
 <body>
   <h1>Ma position actuelle</h1>
+
+  <div id="ui">
+    <button id="btn">📍 Me localiser</button>
+    <span id="status">En attente…</span>
+  </div>
+
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Création de la carte centrée par défaut sur Paris
-    var map = L.map('map').setView([48.8566, 2.3522], 13);
-
-    // Ajout des tuiles OpenStreetMap
+    // Carte centrée sur Paris par défaut
+    const map = L.map('map').setView([48.8566, 2.3522], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
+      maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Géolocalisation
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        var lat = position.coords.latitude;
-        var lon = position.coords.longitude;
+    const statusEl = document.getElementById('status');
+    const btn = document.getElementById('btn');
 
-        // Déplacer la carte sur ta position
-        map.setView([lat, lon], 15);
+    let marker, accuracyCircle;
 
-        // Ajouter un marqueur sur ta position
-        L.marker([lat, lon]).addTo(map)
-          .bindPopup("📍 Vous êtes ici")
-          .openPopup();
-      }, function(err) {
-        alert("La géolocalisation a été refusée ou a échoué : " + (err.message || ""));
-      });
-    } else {
-      alert("La géolocalisation n'est pas supportée par votre navigateur.");
+    function logDebug(msg){
+      const box = document.getElementById('debug');
+      if (box) { box.textContent += msg + '\n'; }
+      console.log(msg);
     }
+
+    function showPosition(lat, lon, acc){
+      // Nettoyage ancien marqueur/cercle
+      if (marker) map.removeLayer(marker);
+      if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+      const latlng = [lat, lon];
+      marker = L.marker(latlng).addTo(map).bindPopup("📍 Vous êtes ici");
+      accuracyCircle = L.circle(latlng, { radius: acc }).addTo(map);
+
+      map.setView(latlng, 16);
+      marker.openPopup();
+
+      statusEl.textContent = `OK: lat=${lat.toFixed(6)}, lon=${lon.toFixed(6)}, précision ≈ ${Math.round(acc)} m`;
+      logDebug(`OK → lat=${lat}, lon=${lon}, accuracy=${acc}m`);
+    }
+
+    function onSuccess(pos){
+      const { latitude, longitude, accuracy } = pos.coords;
+      showPosition(latitude, longitude, accuracy);
+    }
+
+    function onError(err){
+      const msg = `${err.code} ${err.message || 'Erreur inconnue'}`;
+      statusEl.textContent = "Erreur géoloc : " + msg + " (vérifie l’autorisation du site)";
+      logDebug("ERREUR géoloc → " + msg);
+    }
+
+    function requestLocation(){
+      if (!('geolocation' in navigator)) {
+        statusEl.textContent = "Ce navigateur ne supporte pas la géolocalisation.";
+        logDebug("Geolocation API absente.");
+        return;
+      }
+      statusEl.textContent = "Demande de localisation…";
+      logDebug("Demande envoyée à navigator.geolocation.getCurrentPosition");
+      navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      });
+    }
+
+    btn.addEventListener('click', requestLocation);
+
+    // Tentative auto au chargement (utile si le site est déjà autorisé)
+    window.addEventListener('load', () => {
+      setTimeout(() => requestLocation(), 300);
+    });
   </script>
 
   <!-- Debug overlay -->
