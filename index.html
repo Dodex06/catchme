@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Carte avec localisation</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 80vh; width: 100%; }
-    #ui  { display:flex; gap:.5rem; align-items:center; margin:8px 0; font-family: system-ui, sans-serif; }
-    #status { opacity:.8; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    header { padding: 12px 16px; }
+    #ui { display: flex; gap: .5rem; align-items: center; padding: 0 16px 8px; }
+    #btn { padding: .6rem 1rem; border: 1px solid #ccc; border-radius: .6rem; cursor: pointer; }
+    #status { opacity: .8; }
+    #map { height: calc(100vh - 120px); width: 100%; }
   </style>
 </head>
 <body>
-  <h1>Ma position actuelle</h1>
+  <header><h1>Ma position actuelle</h1></header>
 
   <div id="ui">
     <button id="btn">📍 Me localiser</button>
@@ -31,29 +34,19 @@
 
     const statusEl = document.getElementById('status');
     const btn = document.getElementById('btn');
-
     let marker, accuracyCircle;
 
-    function logDebug(msg){
-      const box = document.getElementById('debug');
-      if (box) { box.textContent += msg + '\n'; }
-      console.log(msg);
-    }
-
     function showPosition(lat, lon, acc){
-      // Nettoyage ancien marqueur/cercle
       if (marker) map.removeLayer(marker);
       if (accuracyCircle) map.removeLayer(accuracyCircle);
 
       const latlng = [lat, lon];
       marker = L.marker(latlng).addTo(map).bindPopup("📍 Vous êtes ici");
       accuracyCircle = L.circle(latlng, { radius: acc }).addTo(map);
-
       map.setView(latlng, 16);
       marker.openPopup();
 
       statusEl.textContent = `OK: lat=${lat.toFixed(6)}, lon=${lon.toFixed(6)}, précision ≈ ${Math.round(acc)} m`;
-      logDebug(`OK → lat=${lat}, lon=${lon}, accuracy=${acc}m`);
     }
 
     function onSuccess(pos){
@@ -64,17 +57,14 @@
     function onError(err){
       const msg = `${err.code} ${err.message || 'Erreur inconnue'}`;
       statusEl.textContent = "Erreur géoloc : " + msg + " (vérifie l’autorisation du site)";
-      logDebug("ERREUR géoloc → " + msg);
     }
 
     function requestLocation(){
       if (!('geolocation' in navigator)) {
         statusEl.textContent = "Ce navigateur ne supporte pas la géolocalisation.";
-        logDebug("Geolocation API absente.");
         return;
       }
       statusEl.textContent = "Demande de localisation…";
-      logDebug("Demande envoyée à navigator.geolocation.getCurrentPosition");
       navigator.geolocation.getCurrentPosition(onSuccess, onError, {
         enableHighAccuracy: true,
         timeout: 15000,
@@ -83,26 +73,7 @@
     }
 
     btn.addEventListener('click', requestLocation);
-
-    // Tentative auto au chargement (utile si le site est déjà autorisé)
-    window.addEventListener('load', () => {
-      setTimeout(() => requestLocation(), 300);
-    });
-  </script>
-
-  <!-- Debug overlay -->
-  <script>
-    (function () {
-      const box = document.createElement('pre');
-      box.id = 'debug';
-      box.style.cssText =
-        'white-space:pre-wrap;padding:12px;background:#111;color:#0f0;font:14px ui-monospace,Menlo,monospace;position:fixed;left:8px;right:8px;bottom:8px;max-height:50vh;overflow:auto;border-radius:8px;opacity:.95;z-index:999999';
-      function show(){ if(!document.body.contains(box)) document.body.appendChild(box); }
-      function log(...a){ show(); box.textContent += a.join(' ') + '\n'; }
-      window.addEventListener('error', e => log('ERROR:', e.message, '@', e.filename+':'+e.lineno+':'+e.colno));
-      window.addEventListener('unhandledrejection', e => log('PROMISE:', (e.reason && (e.reason.stack||e.reason.message)) || e.reason));
-      log('Debug overlay actif.');
-    })();
+    window.addEventListener('load', () => setTimeout(requestLocation, 300)); // tentative auto
   </script>
 </body>
 </html>
