@@ -4,31 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CatchMe Debug</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 80vh; }
+    #info { padding: 8px; background: #eee; font-family: sans-serif; }
+  </style>
 </head>
 <body>
 
-  <!-- Ici ton contenu habituel : HTML, scripts, carte, etc. -->
-  <h1>Test CatchMe</h1>
+  <h1>CatchMe Debug</h1>
+  <div id="info">Chargement…</div>
+  <div id="map"></div>
+  <button id="locateBtn">📍 Me localiser</button>
 
-  <!-- Scripts de ton projet -->
-  <script src="ton-script.js"></script>
-  <!-- ... tous les autres scripts -->
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <!-- Début debug overlay -->
+  <!-- Script principal -->
   <script>
-  (function () {
-    const box = document.createElement('pre');
-    box.id = 'debug';
-    box.style.cssText =
-      'white-space:pre-wrap;padding:12px;background:#111;color:#0f0;font:14px ui-monospace,Menlo,monospace;position:fixed;left:8px;right:8px;bottom:8px;max-height:50vh;overflow:auto;border-radius:8px;opacity:.95;z-index:999999';
-    function show(){ if(!document.body.contains(box)) document.body.appendChild(box); }
-    function log(...a){ show(); box.textContent += a.join(' ') + '\n'; }
-    window.addEventListener('error', e => log('ERROR:', e.message, '@', e.filename+':'+e.lineno+':'+e.colno));
-    window.addEventListener('unhandledrejection', e => log('PROMISE:', (e.reason && (e.reason.stack||e.reason.message)) || e.reason));
-    log('Debug overlay actif.');
-  })();
+    // 1) Carte
+    const map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker = null, accuracyCircle = null;
+    const info = document.getElementById('info');
+
+    function onLocationFound(e) {
+      const { latlng, accuracy } = e;
+      if (marker) map.removeLayer(marker);
+      if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+      marker = L.marker(latlng).addTo(map).bindPopup('Vous êtes ici');
+      accuracyCircle = L.circle(latlng, { radius: accuracy }).addTo(map);
+      map.setView(latlng, 16);
+      info.textContent =
+        `Lat: ${latlng.lat.toFixed(6)} | Lng: ${latlng.lng.toFixed(6)} | Précision ≈ ${Math.round(accuracy)} m`;
+      marker.openPopup();
+    }
+
+    function onLocationError(e) {
+      const msg = (e.message || '').toString();
+      info.textContent = "Erreur de géolocalisation : " + msg;
+      alert(
+        "Géolocalisation impossible : " + msg +
+        "\nVérifie : Réglages > Confidentialité > Service de localisation (activé)," +
+        "\nSafari > Localisation : Autoriser (Position exacte activée)."
+      );
+    }
+
+    map.on('locationfound', onLocationFound);
+    map.on('locationerror', onLocationError);
+
+    // Demande de position (appelée au clic et au chargement)
+    function requestLocation(isAuto = false) {
+      if (!('geolocation' in navigator)) {
+        info.textContent = "Ce navigateur ne supporte pas la géolocalisation.";
+        return;
+      }
+      info.textContent = isAuto
+        ? "Demande d’autorisation envoyée…"
+        : "Recherche de votre position…";
+      map.locate({
+        setView: false,
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      });
+      // Petit rappel si ça traîne
+      setTimeout(() => {
+        if (info.textContent.includes("Demande") || info.textContent.includes("Recherche")) {
+          info.textContent = "Toujours en attente… Autorise la localisation pour ce site.";
+        }
+      }, 6000);
+    }
+
+    document.getElementById('locateBtn').addEventListener('click', () => requestLocation(false));
+
+    // Demande automatique dès l’ouverture de la page
+    window.addEventListener('load', () => requestLocation(true));
   </script>
-  <!-- Fin debug overlay -->
+
+  <!-- Debug overlay -->
+  <script>
+    (function () {
+      const box = document.createElement('pre');
+      box.id = 'debug';
+      box.style.cssText =
+        'white-space:pre-wrap;padding:12px;background:#111;color:#0f0;font:14px ui-monospace,Menlo,monospace;position:fixed;left:8px;right:8px;bottom:8px;max-height:50vh;overflow:auto;border-radius:8px;opacity:.95;z-index:999999';
+      function show(){ if(!document.body.contains(box)) document.body.appendChild(box); }
+      function log(...a){ show(); box.textContent += a.join(' ') + '\n'; }
+      window.addEventListener('error', e => log('ERROR:', e.message, '@', e.filename+':'+e.lineno+':'+e.colno));
+      window.addEventListener('unhandledrejection', e => log('PROMISE:', (e.reason && (e.reason.stack||e.reason.message)) || e.reason));
+      log('Debug overlay actif.');
+    })();
+  </script>
 
 </body>
 </html>
