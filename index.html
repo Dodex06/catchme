@@ -3,87 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CatchMe Debug</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <title>Carte avec localisation</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <style>
-    #map { height: 80vh; }
-    #info { padding: 8px; background: #eee; font-family: sans-serif; }
+    #map {
+      height: 90vh;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
-
-  <h1>CatchMe Debug</h1>
-  <div id="info">Chargement…</div>
+  <h1>Ma position actuelle</h1>
   <div id="map"></div>
-  <button id="locateBtn">📍 Me localiser</button>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-  <!-- Script principal -->
   <script>
-    // 1) Carte
-    const map = L.map('map').setView([0, 0], 2);
+    // Création de la carte centrée par défaut sur Paris
+    var map = L.map('map').setView([48.8566, 2.3522], 13);
+
+    // Ajout des tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    let marker = null, accuracyCircle = null;
-    const info = document.getElementById('info');
+    // Géolocalisation
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var lat = position.coords.latitude;
+        var lon = position.coords.longitude;
 
-    function onLocationFound(e) {
-      const { latlng, accuracy } = e;
-      if (marker) map.removeLayer(marker);
-      if (accuracyCircle) map.removeLayer(accuracyCircle);
+        // Déplacer la carte sur ta position
+        map.setView([lat, lon], 15);
 
-      marker = L.marker(latlng).addTo(map).bindPopup('Vous êtes ici');
-      accuracyCircle = L.circle(latlng, { radius: accuracy }).addTo(map);
-      map.setView(latlng, 16);
-      info.textContent =
-        `Lat: ${latlng.lat.toFixed(6)} | Lng: ${latlng.lng.toFixed(6)} | Précision ≈ ${Math.round(accuracy)} m`;
-      marker.openPopup();
-    }
-
-    function onLocationError(e) {
-      const msg = (e.message || '').toString();
-      info.textContent = "Erreur de géolocalisation : " + msg;
-      alert(
-        "Géolocalisation impossible : " + msg +
-        "\nVérifie : Réglages > Confidentialité > Service de localisation (activé)," +
-        "\nSafari > Localisation : Autoriser (Position exacte activée)."
-      );
-    }
-
-    map.on('locationfound', onLocationFound);
-    map.on('locationerror', onLocationError);
-
-    // Demande de position (appelée au clic et au chargement)
-    function requestLocation(isAuto = false) {
-      if (!('geolocation' in navigator)) {
-        info.textContent = "Ce navigateur ne supporte pas la géolocalisation.";
-        return;
-      }
-      info.textContent = isAuto
-        ? "Demande d’autorisation envoyée…"
-        : "Recherche de votre position…";
-      map.locate({
-        setView: false,
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
+        // Ajouter un marqueur sur ta position
+        L.marker([lat, lon]).addTo(map)
+          .bindPopup("📍 Vous êtes ici")
+          .openPopup();
+      }, function(err) {
+        alert("La géolocalisation a été refusée ou a échoué : " + (err.message || ""));
       });
-      // Petit rappel si ça traîne
-      setTimeout(() => {
-        if (info.textContent.includes("Demande") || info.textContent.includes("Recherche")) {
-          info.textContent = "Toujours en attente… Autorise la localisation pour ce site.";
-        }
-      }, 6000);
+    } else {
+      alert("La géolocalisation n'est pas supportée par votre navigateur.");
     }
-
-    document.getElementById('locateBtn').addEventListener('click', () => requestLocation(false));
-
-    // Demande automatique dès l’ouverture de la page
-    window.addEventListener('load', () => requestLocation(true));
   </script>
 
   <!-- Debug overlay -->
@@ -100,6 +62,5 @@
       log('Debug overlay actif.');
     })();
   </script>
-
 </body>
 </html>
